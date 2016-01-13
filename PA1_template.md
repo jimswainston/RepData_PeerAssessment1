@@ -10,7 +10,8 @@ output:
 
 **1) Code for reading in dataset**
 
-```{r echo=TRUE,message=FALSE}
+
+```r
 library(dplyr)
 x <- read.csv("activity.csv")
 ```
@@ -18,33 +19,46 @@ x <- read.csv("activity.csv")
 ## What is mean total number of steps taken per day?
 
 **2) Code and histogram of total number of steps taken each day**
-```{r echo=TRUE}
+
+```r
 by_date <- group_by(x,date)
 step_total_by_date <- summarise(by_date, step_total = sum(steps))
 hist(step_total_by_date$step_total,
      main = "Histogram of total number of steps taken each day",
      xlab = "Step Total",
      col = "royalblue")
-
 ```
+
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
 
 **3) Code and results for the median number of steps taken each day**
 
 Mean number of steps per day
-```{r echo=TRUE}
+
+```r
 mean(step_total_by_date$step_total,na.rm = TRUE)
 ```
 
+```
+## [1] 10766.19
+```
+
 Median number of steps per day
-```{r echo=TRUE}
+
+```r
 median(step_total_by_date$step_total,na.rm = TRUE)
+```
+
+```
+## [1] 10765
 ```
 
 
 ## What is the average daily activity pattern?
 
 **4) Code and time series plot of the average number of steps taken**
-```{r echo=TRUE}
+
+```r
 by_interval <- group_by(x,interval)
 step_total_by_interval <- summarise(by_interval, step_total = sum(steps,na.rm = TRUE))
 step_total_by_interval_averages <- mutate(step_total_by_interval,
@@ -55,10 +69,20 @@ plot(step_total_by_interval_averages$interval,step_total_by_interval_averages$st
      ylab = "Average steps taken")
 ```
 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
+
 **5) The 5-minute interval with the maximum number of steps on average accross all days in the dataset is interval 835**
 
-```{r echo=TRUE}
+
+```r
 filter(step_total_by_interval_averages, step_average == max(step_average))
+```
+
+```
+## Source: local data frame [1 x 3]
+## 
+##   interval step_total step_average
+## 1      835      10927     179.1311
 ```
 
 ## Imputing missing values
@@ -66,14 +90,20 @@ filter(step_total_by_interval_averages, step_average == max(step_average))
 **6) Code to describe and show a strategy for inputing missing data**
 
 The total number of missing step values:
-```{r echo=TRUE}
+
+```r
 log_na <- is.na(x$steps)
 sum(log_na)
 ```
 
+```
+## [1] 2304
+```
+
 All NAs in original dataset will be replaced with the average (across all days) step count for that interval
 
-```{r echo=TRUE}
+
+```r
 ## Create function to return the average step count for specified inteval
 f <- function(df,i) {
   val <- df[df$interval==i,3]
@@ -94,21 +124,34 @@ step_total_by_date_imputed <- summarise(by_date_imputed, step_total = sum(steps)
 
 **7) Histogram of the total number of steps taken each day after missing values are imputed**
 
-```{r echo=TRUE}
+
+```r
 hist(step_total_by_date_imputed$step_total,
      main = "Histogram of total number of steps taken each day",
      xlab = "Step Total",
      col = "royalblue")
 ```
 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
+
 Mean number of steps per day
-```{r echo=TRUE}
+
+```r
 mean(step_total_by_date_imputed$step_total,na.rm = TRUE)
 ```
 
+```
+## [1] 10581.01
+```
+
 Median number of steps per day
-```{r echo=TRUE}
+
+```r
 median(step_total_by_date_imputed$step_total,na.rm = TRUE)
+```
+
+```
+## [1] 10395
 ```
 
 The values for mean and median are now lower after the missing step count values have been imputed. 
@@ -119,13 +162,15 @@ The values for mean and median are now lower after the missing step count values
 **8) Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends**
 
 First we create a new factor variable in dataset indicating wheter a given date is a weekday or weekend day
-```{r echo=TRUE}
+
+```r
 daysofweek <- c("Monday","Tuesday","Wednesday","Thursday","Friday")
 
 z <- mutate(y,week_or_weekend = ifelse(weekdays(as.Date(date, format = "%Y-%m-%d")) %in% daysofweek,"weekday","weekend"))
 ```
 
-```{r echo=TRUE}
+
+```r
 ## compute weekday interval averages
 z_weekday <- z[z$week_or_weekend=="weekday",]
 by_date_z_weekday <- group_by(z_weekday,date)
@@ -156,5 +201,6 @@ plot(step_total_by_interval_averages_z_weekend$interval,step_total_by_interval_a
      main = "Weekend",
      xlab="Time Interval",
      ylab = "Average steps taken")
-
 ```
+
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png) 
